@@ -15,8 +15,14 @@ float left=120, right=520, top=165, bottom=315;        // Table boundaries
 float middle=250;
 boolean wall=true;
 boolean ratclick=false;
+boolean birdmove=false;
+boolean bombdrop=false;
 float ratX = left;
-float ratY= random(bottom, top);
+float ratDX = 8;
+float ratY= random(top, bottom);
+float birdX = 0;
+float bombY = 110;
+float bombDY = 0;
 
 int tableRed=150, tableGreen=250, tableBlue=150;      // Green pool table
 int score=0,m=0,k=0;
@@ -93,6 +99,8 @@ void draw() {
   count += 1;
   if (key == 'm' && ratX >left ) { rat(); }
   if (ratclick = true && ratX > left) { rat(); }
+  bomb();
+  if (birdmove == true) { bird(); }
   messages();
   buttons();
 }
@@ -103,10 +111,7 @@ void keyPressed() {
   if (key == 'r') { reset(); }
   if (key == 'w') { wall=false; }  // Remove wall
   if (key == 'p') { tableRed= 250; tableGreen=150; tableBlue=235; } // Pink table
-  
-  /// 'm' starts rat animation
-  if (key == 'm') { rat(); }  
-  
+
   /// Number keys reset balls (reset reduces score)
   if (key == '1') { a.reset(); score -= 5; }
   if (key == '2') { b.reset(); score -= 5; }
@@ -114,6 +119,9 @@ void keyPressed() {
   if (key == '4') { d.reset(); score -= 5; }
   if (key == '5') { e.reset(); score -= 5; }
   if (key == 'c') { cue.x= (left+right)/3; cue.y= (top+bottom)/2; cue.dx=0; cue.dy=0; score -= 5; }
+  
+  // f key freezes ball movement for diagnostic purposes
+  if (key == 'f') { a.dx=0; a.dy=0; b.dx=0; b.dy=0; c.dx=0; c.dy=0; d.dx=0; d.dy=0; e.dx=0; e.dy=0; cue.dx=0; cue.dy=0; }
 }
 
 /// Resets balls when clicked (reset reduces score)
@@ -126,19 +134,31 @@ void mouseClicked() {
   if ( dist(cue.x,cue.y, mouseX,mouseY) < 18) { 
     cue.x= (left+right)/3; cue.y= (top+bottom)/2; cue.dx=0; cue.dy=0; }
     
-  // Reset/Wall/Bird/Rat functions when different buttons are clicked  
+  if ( dist(ratX,ratY, mouseX,mouseY) < 30) { ratX=left; score += 50; }
+
+    
+//// BUTTONS 
+  // RESET //
   if ( mouseX > aa.x && mouseX < aa.x+aa.w &&
     mouseY > aa.y && mouseY < aa.y+aa.h ) {
       reset(); 
     }
+  // WALL //
   if ( mouseX > bb.x && mouseX < bb.x+bb.w &&
     mouseY > bb.y && mouseY < bb.y+bb.h ) {
       wall=false;
     }
+  // BOMB IF BIRD FLYING //
+  if ( mouseX > cc.x && mouseX < cc.x+cc.w &&
+    mouseY > cc.y && mouseY < cc.y+cc.h && birdmove == true ) {
+      drop();
+    }    
+  // BIRD FLY //
   if ( mouseX > cc.x && mouseX < cc.x+cc.w &&
     mouseY > cc.y && mouseY < cc.y+cc.h ) {
-      //bird();
+      birdmove=true;
     }
+  // RAT //
   if ( mouseX > dd.x && mouseX < dd.x+dd.w &&
     mouseY > dd.y && mouseY < dd.y+dd.h ) {
       rat();
@@ -162,6 +182,33 @@ void table( float east, float north, float west, float south ) {
   strokeWeight(1);
 }
 
+void bird() {
+  if (birdX > width) {
+    birdX = 0; birdmove=false; }
+  fill(0);
+  ellipse(birdX,100,35,15);
+  ellipse(birdX+16,94,15,15);
+  if (count/30 % 2 == 0) {
+    triangle(birdX-10,97, birdX,77, birdX+10,97); }
+    else {
+      triangle(birdX-10,103, birdX,123, birdX+10,103); }
+  birdX += 4;  
+}
+  
+void bomb() {
+  if (bombdrop == true) {
+    fill(255,255,255);
+    ellipse(birdX-10, bombY, 10,10);
+    bombY *= bombDY;
+  }
+}
+
+void drop() {
+  bombdrop = true;
+  bombY = 112;
+  bombDY = 1.03;
+}
+
 // Draws and creates the rat
 void rat() {
   if (ratX < right) {
@@ -178,8 +225,8 @@ void rat() {
       line(ratX+5,ratY, ratX+5,ratY+15);    // front left
     } else {
       line(ratX-20,ratY, ratX-15,ratY+15);  // angle back left
-      line(ratX+10,ratY, ratX+10,ratY+15);  // front right
-      line(ratX-15,ratY, ratX-15,ratY+15);  // back right      
+      line(ratX+10,ratY, ratX+13,ratY+15);  // front right
+      line(ratX-15,ratY, ratX-12,ratY+15);  // back right      
       line(ratX+5,ratY, ratX+10,ratY+15);   // angle front left
     }
     
@@ -190,9 +237,16 @@ void rat() {
     fill(0,0,0);
     ellipse(ratX+14,ratY-4,3,3);    // eyes
     ellipse(ratX+25,ratY,3,3);      // nose
-    ratX += 2;
-  } else { ratX = left;             // sets rat back at start location
+    ratX += ratDX;
+  } else { ratX = left; ratY= random(top, bottom); ratDX= random(5, 10); // sets rat back at start location
   }
+  
+  if ( dist(a.x,a.y, ratX,ratY) < 10) { ratX += 15; a.dx=0; a.dy=0; score -= 10; }
+  if ( dist(b.x,b.y, ratX,ratY) < 10) { ratX += 15; b.dx=0; b.dy=0; score -= 10; }
+  if ( dist(c.x,c.y, ratX,ratY) < 10) { ratX += 15; c.dx=0; c.dy=0; score -= 10; }
+  if ( dist(d.x,d.y, ratX,ratY) < 10) { ratX += 15; d.dx=0; d.dy=0; score -= 10; }
+  if ( dist(e.x,e.y, ratX,ratY) < 10) { ratX += 15; e.dx=0; e.dy=0; score -= 10; }
+  if ( dist(cue.x,cue.y, ratX,ratY) < 10) { ratX += 15; cue.dx=0; cue.dy=0; score -= 10; }
 }
 
 // Display messages
@@ -221,8 +275,7 @@ void grass() {
 
 // Draws the clouds across the top
 void clouds() {
-  for (int i=0; i<width; i += 80) {
-    //float r = random(0, top-25);
+  for (int i=100; i<width; i += 100) {
     int r = 130;
     noStroke();
     fill(230,230,230);

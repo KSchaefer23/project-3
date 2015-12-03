@@ -5,66 +5,77 @@
 //// 5 balls, cue, 4 buttons ////
 Ball a,b,c,d,e, cue;
 Button aa, bb, cc, dd;
+// Cloud aaa;
 
 //// OTHER GLOBALS:  strings, pool table, etc ////
 String news=   "Click any ball to reset it to right half of table.  ('r' resets all)";
 String author=  "Kevin Schaefer";
 String display= "Score:";
 
-float left=120, right=520, top=165, bottom=315;        // Table boundaries
+// Table boundaries
+float left=120, right=520, top=165, bottom=315;
 float middle=250;
-boolean wall=true;
+boolean wall=true;                                
+// Set booleans
 boolean ratclick=false;
 boolean birdmove=false;
 boolean bombdrop=false;
+// Initializes rat position/movement
 float ratX = left;
 float ratDX = 8;
+float ratDY = 0;
 float ratY= random(top, bottom);
+// Initializes bird and bomb start location
 float birdX = 0;
 float bombY = 110;
 float bombDY = 0;
-
-int tableRed=150, tableGreen=250, tableBlue=150;      // Green pool table
+// Creates green pool table
+int tableRed=150, tableGreen=250, tableBlue=150;
+// Initializes count and score
 int score=0,m=0,k=0;
 int count= 0;
 
 
 //// SETUP:  size, table, balls, buttons
 void setup() {
-    size ( 700, 500 );
-    left = ((width/2)-200);
-    top = ((height/2)-75); 
-    right = ((width/2)+200);
-    bottom = ((height/2)+75);
-    middle = (width/2);
-    
-    a = new Ball();
-    a.r= 255; a.name= "1";
-    b = new Ball();
-    b.g= 255; b.name= "2";
-    c = new Ball();
-    c.g= 255; c.b= 255; c.name= "3";
-    d = new Ball();
-    d.r= 255; d.g=255; d.name= "4";
-    e = new Ball();
-    e.r= 200; e.b=255; e.name= "5";
-    cue = new Ball();
-    cue.r= 255; cue.g= 255; cue.b= 255;
-    
-    aa = new Button();
-    aa.name= "RESET"; aa.x=100; aa.y=50; aa.w=60; aa.h=20;
-    bb = new Button();
-    bb.name= "WALL"; bb.x=180; bb.y=50; bb.w=60; bb.h=20;
-    cc = new Button();
-    cc.name= "BIRD"; cc.x=260; cc.y=50; cc.w=60; cc.h=20;
-    dd = new Button();
-    dd.name= "RAT"; dd.x=340; dd.y=50; dd.w=60; dd.h=20;
-    
-    reset() ;
+  // Keeps table same size, but centered
+  size ( 700, 500 );
+  left = ((width/2)-200);
+  top = ((height/2)-75); 
+  right = ((width/2)+200);
+  bottom = ((height/2)+75);
+  middle = (width/2);
+  
+  // Creates the balls
+  a = new Ball();
+  a.r= 255; a.name= "1";
+  b = new Ball();
+  b.g= 255; b.name= "2";
+  c = new Ball();
+  c.g= 255; c.b= 255; c.name= "3";
+  d = new Ball();
+  d.r= 255; d.g=255; d.name= "4";
+  e = new Ball();
+  e.r= 200; e.b=255; e.name= "5";
+  cue = new Ball();
+  cue.r= 255; cue.g= 255; cue.b= 255;
+  
+  // Creates the buttons
+  aa = new Button();
+  aa.name= "RESET"; aa.x=100; aa.y=50; aa.w=60; aa.h=20;
+  bb = new Button();
+  bb.name= "WALL"; bb.x=180; bb.y=50; bb.w=60; bb.h=20;
+  cc = new Button();
+  cc.name= "BIRD"; cc.x=260; cc.y=50; cc.w=60; cc.h=20;
+  dd = new Button();
+  dd.name= "RAT"; dd.x=340; dd.y=50; dd.w=60; dd.h=20;
+  
+  reset() ;
 }
 
 // Creates the reset/default game start
 void reset() {
+  // Starts score at zero and initial reset position
   score= 0;
   wall=true;
   ratX=left;
@@ -88,7 +99,7 @@ void reset() {
   cue.dx= 0;               cue.dy= 0;
 }
 
-//// Draw scene and call functions
+//// Draws the scene and calls functions
 void draw() {
   background( 250,250,200 );
   rectMode( CORNERS );
@@ -97,8 +108,9 @@ void draw() {
   grass();
   clouds();
   count += 1;
+  // Handles mouse/bird/bomb draw each frame
   if (key == 'm' && ratX >left ) { rat(); }
-  if (ratclick = true && ratX > left) { rat(); }
+  if (ratclick = true && ratX > left) { ratDY=random(-3,3); rat(); }
   bomb();
   if (birdmove == true) { bird(); }
   messages();
@@ -132,33 +144,33 @@ void mouseClicked() {
   if ( dist(d.x,d.y, mouseX,mouseY) < 18) { d.reset(); score -= 5; }
   if ( dist(e.x,e.y, mouseX,mouseY) < 18) { e.reset(); score -= 5; }
   if ( dist(cue.x,cue.y, mouseX,mouseY) < 18) { 
-    cue.x= (left+right)/3; cue.y= (top+bottom)/2; cue.dx=0; cue.dy=0; }
+    cue.x= (left+right)/3; cue.y= (top+bottom)/2; cue.dx=0; cue.dy=0; score-= 5;}
     
   if ( dist(ratX,ratY, mouseX,mouseY) < 30) { ratX=left; score += 50; }
 
     
 //// BUTTONS 
-  // RESET //
+  // RESET 
   if ( mouseX > aa.x && mouseX < aa.x+aa.w &&
     mouseY > aa.y && mouseY < aa.y+aa.h ) {
       reset(); 
     }
-  // WALL //
+  // WALL 
   if ( mouseX > bb.x && mouseX < bb.x+bb.w &&
     mouseY > bb.y && mouseY < bb.y+bb.h ) {
       wall=false;
     }
-  // BOMB IF BIRD FLYING //
+  // BOMB IF BIRD FLYING 
   if ( mouseX > cc.x && mouseX < cc.x+cc.w &&
     mouseY > cc.y && mouseY < cc.y+cc.h && birdmove == true ) {
       drop();
     }    
-  // BIRD FLY //
+  // BIRD FLY 
   if ( mouseX > cc.x && mouseX < cc.x+cc.w &&
     mouseY > cc.y && mouseY < cc.y+cc.h ) {
       birdmove=true;
     }
-  // RAT //
+  // RAT 
   if ( mouseX > dd.x && mouseX < dd.x+dd.w &&
     mouseY > dd.y && mouseY < dd.y+dd.h ) {
       rat();
@@ -167,10 +179,10 @@ void mouseClicked() {
 
 //// Scene: Table w/ wall in middle
 void table( float east, float north, float west, float south ) {
-  fill( tableRed, tableGreen, tableBlue );    // pool table
+  fill( tableRed, tableGreen, tableBlue );        // pool table
   strokeWeight(20);
-  stroke( 127, 0, 0 );      // Brown walls
-  rect( east-20, north-20, west+20, south+20 );
+  stroke( 127, 0, 0 );                            // Brown walls
+  rect( east-20, north-20, west+20, south+20 );   // Table border
 
   // Start with a WALL down the middle of the table
   if (wall==true) {
@@ -182,34 +194,38 @@ void table( float east, float north, float west, float south ) {
   strokeWeight(1);
 }
 
+//// Creates the bird shape and starting location
 void bird() {
   if (birdX > width) {
     birdX = 0; birdmove=false; }
   fill(0);
-  ellipse(birdX,100,35,15);
-  ellipse(birdX+16,94,15,15);
-  if (count/30 % 2 == 0) {
-    triangle(birdX-10,97, birdX,77, birdX+10,97); }
+  ellipse(birdX,100,35,15);        // Bird body
+  ellipse(birdX+16,94,15,15);      // Bird head
+  if (count/30 % 2 == 0) {    
+    triangle(birdX-10,97, birdX,77, birdX+10,97); }        // up wing
     else {
-      triangle(birdX-10,103, birdX,123, birdX+10,103); }
+      triangle(birdX-10,103, birdX,123, birdX+10,103); }   // down wing
   birdX += 4;  
 }
-  
+
+/// Creates the bomb shape
 void bomb() {
   if (bombdrop == true) {
+    stroke(0);
     fill(255,255,255);
     ellipse(birdX-10, bombY, 10,10);
     bombY *= bombDY;
   }
 }
 
+/// Bomb droping function and initialization
 void drop() {
   bombdrop = true;
   bombY = 112;
   bombDY = 1.03;
 }
 
-// Draws and creates the rat
+/// Creates the rat shape
 void rat() {
   if (ratX < right) {
     stroke(245,150,220);                          // tail
@@ -238,9 +254,11 @@ void rat() {
     ellipse(ratX+14,ratY-4,3,3);    // eyes
     ellipse(ratX+25,ratY,3,3);      // nose
     ratX += ratDX;
-  } else { ratX = left; ratY= random(top, bottom); ratDX= random(5, 10); // sets rat back at start location
+    ratY += ratDY;
+  } else { ratX = left; ratY= random(top, bottom); ratDX= random(5, 10);       // sets rat back at start location
   }
   
+  // Determines distance between ball and rate to adjust score
   if ( dist(a.x,a.y, ratX,ratY) < 10) { ratX += 15; a.dx=0; a.dy=0; score -= 10; }
   if ( dist(b.x,b.y, ratX,ratY) < 10) { ratX += 15; b.dx=0; b.dy=0; score -= 10; }
   if ( dist(c.x,c.y, ratX,ratY) < 10) { ratX += 15; c.dx=0; c.dy=0; score -= 10; }
@@ -249,7 +267,7 @@ void rat() {
   if ( dist(cue.x,cue.y, ratX,ratY) < 10) { ratX += 15; cue.dx=0; cue.dy=0; score -= 10; }
 }
 
-// Display messages
+/// Display messages
 void messages() {
   fill(0);
   text( news, width/9, 30 );
@@ -258,22 +276,27 @@ void messages() {
   text( score, width-140, 30);
 }
 
-// Draws the grass across bottom
+/// Draws the moving grass across bottom
 void grass() {
   stroke(40,165,60);
-  strokeWeight(2);
+  strokeWeight(3);
   int x = 0;
   float y = bottom + 30;
   while (y < height+10) {
-    for (x=0; x<width+10; x += 7) {
-      line(x,y, x+7, y-7);
+    for (x=0; x<width+10; x += 10) {
+      if (count/30 % 2 == 0) {            // Grass movement
+        strokeWeight(3);
+        line(x,y, x+7, y-7); }
+      else {
+        strokeWeight(3);
+        line(x,y, x-7, y-7); }            // Grass movement
     }
-    y += 5; 
+    y += 6; 
   strokeWeight(1);
   }
 }
 
-// Draws the clouds across the top
+/// Creates the clouds shape across the top
 void clouds() {
   for (int i=100; i<width; i += 100) {
     int r = 130;
@@ -285,7 +308,7 @@ void clouds() {
   }
 } 
 
-// Function to display the buttons
+/// Function to display the buttons
 void buttons() {
   aa.show();
   bb.show();
@@ -293,35 +316,35 @@ void buttons() {
   dd.show();
 }
 
-// Ball collisions/show/move
+/// Ball collisions/show/move
 void balls() {
   collision( a, b );
   collision( a, c );
   collision( a, d );
   collision( a, e );
-  //if (cue.dx > 0) {
+  //if (cue.dx > 0) {    // optional code to only count collision if cue is moving
   collision( a, cue);
   //}
   //
   collision( b, c );
   collision( b, d );
   collision( b, e );
-  //if (cue.dx > 0) {
+  //if (cue.dx > 0) {    //  ^^^
   collision( b, cue);
   //}
   //
   collision( c, d );
   collision( c, e );
-  //if (cue.dx > 0) {
+  //if (cue.dx > 0) {    //  ^^^
   collision( c, cue);
   //}
   //
   collision( d, e ); 
-  //if (cue.dx > 0) {
+  //if (cue.dx > 0) {    //  ^^^
   collision( d, cue);
   //}
   //
-  //if (cue.dx > 0) {
+  //if (cue.dx > 0) {    // ^^^
   collision( e, cue);
   //}
   
@@ -340,7 +363,7 @@ void balls() {
   cue.move();
 }
 
-// Action when two balls collide (adds to score)
+/// Action when two balls collide (adds to score)
 void collision( Ball p, Ball q ) {
   if ( p.hit( q.x,q.y ) ) {
     float tmp;
@@ -350,7 +373,7 @@ void collision( Ball p, Ball q ) {
   }
 }
 
-// Button class gives properties
+/// Button class gives properties
 class Button {
   float x,y,w,h;
   String name="";
@@ -366,6 +389,20 @@ class Button {
   }
 }
 
+/*
+WORK IN PROGRESS SECTION
+//// Cloud class gives properties
+class Cloud {
+  
+  void show() {
+    noStroke();
+    fill(230,230,230);
+    ellipse(i+10,r-10, 30,30);
+    ellipse(i-10,r-7, 20,20);
+    ellipse(i,r, 70,20);
+  
+*/
+
 //// Ball class gives properties
 class Ball {
   float x,y, dx, dy;
@@ -374,6 +411,7 @@ class Ball {
   String name="";
   
   void show() {
+    // Ball properties
     fill(r,g,b);
     ellipse( x,y, 30,30);
     fill(0);

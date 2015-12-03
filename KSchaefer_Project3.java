@@ -5,7 +5,8 @@
 //// 5 balls, cue, 4 buttons ////
 Ball a,b,c,d,e, cue;
 Button aa, bb, cc, dd;
-// Cloud aaa;
+// Cloud aaa[]= Cloud[7];
+int numClouds=3;
 
 //// OTHER GLOBALS:  strings, pool table, etc ////
 String news=   "Click any ball to reset it to right half of table.  ('r' resets all)";
@@ -69,6 +70,8 @@ void setup() {
   cc.name= "BIRD"; cc.x=260; cc.y=50; cc.w=60; cc.h=20;
   dd = new Button();
   dd.name= "RAT"; dd.x=340; dd.y=50; dd.w=60; dd.h=20;
+  
+  // aaa = new Cloud();
   
   reset() ;
 }
@@ -306,7 +309,18 @@ void clouds() {
     ellipse(i-10,r-7, 20,20);
     ellipse(i,r, 70,20);
   }
-} 
+  
+  /*
+  //// new clouds
+  for (int i=0; i<numClouds; i++) {
+    aaa[i].move();
+    aaa[i].show();
+  }
+  */
+}
+  //if (aaa[0].i > width {
+    //numClouds...
+//}
 
 /// Function to display the buttons
 void buttons() {
@@ -390,9 +404,19 @@ class Button {
 }
 
 /*
-WORK IN PROGRESS SECTION
 //// Cloud class gives properties
 class Cloud {
+  
+  float i, r;
+  
+  Cloud( float i, float r) {
+    this.i= i;
+    this.r= r;
+  }
+  void move() {
+    i += random(1,5);
+    r += random(0,2);
+  }
   
   void show() {
     noStroke();
@@ -400,8 +424,10 @@ class Cloud {
     ellipse(i+10,r-10, 30,30);
     ellipse(i-10,r-7, 20,20);
     ellipse(i,r, 70,20);
-  
+  }
+}
 */
+  
 
 //// Ball class gives properties
 class Ball {
